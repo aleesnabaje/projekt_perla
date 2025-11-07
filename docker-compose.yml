@@ -37,7 +37,7 @@ services:
       DB_HOST: mysql
       DB_USER: root
       DB_PASS: haslo123
-      DB_NAME: pythonapp
+      DB_NAME: miasto
     networks:
       - moja_siec
 
