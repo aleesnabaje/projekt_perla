@@ -9,17 +9,23 @@ def get_wydarzenie():
     my_db = db()
     return my_db.get_wydarzenie()
 
-@app.post("/save-wydarzenie")
+@app.post("/wydarzenie")
 async def save_wydarzenie(request: Request):
     wydarzenie_data = await request.json()
-    #sample payload: {"name":"Test","email":"moj@email"}
     my_db = db()
     result = my_db.save_wydarzenie(wydarzenie_data)
     return JSONResponse(status_code=201, content=result)
 
-@app.put("/edytuj-wydarzenie")
-async def put_wydarzenie(request: Request):
+@app.put("/wydarzenie/{id}")
+async def put_wydarzenie(id, request: Request):
     wydarzenie_edytuj = await request.json()
     my_db = db()
-    result = my_db.put_wydarzenie(wydarzenie_edytuj)
+    result = my_db.put_wydarzenie(id, wydarzenie_edytuj)
+    return JSONResponse(status_code=201, content=result)
+
+@app.delete("/wydarzenie/{id}")
+async def soft_delete_wydarzenie(id, request: Request):
+    id = id
+    my_db = db()
+    result = my_db.soft_delete_wydarzenie(id)
     return JSONResponse(status_code=201, content=result)

@@ -21,11 +21,27 @@ class db:
         conn.close()
         return { "status":"ok","added_id": cursor.lastrowid } 
 
-    def put_wydarzenie(self, wydarzenie_edytuj):
+    def put_wydarzenie(self, id, wydarzenie_edytuj):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        kolumna = wydarzenie_edytuj["nazwa_kolumny"]
-        cursor.execute(f"UPDATE wydarzenia SET {kolumna} = %s WHERE id = %s", (wydarzenie_edytuj["nowa_wartosc"], wydarzenie_edytuj["id_rekordu"]))
+        cursor.execute("UPDATE wydarzenia SET data_od = %s WHERE id = %s", (wydarzenie_edytuj["data_od"], id))
+        cursor.execute("UPDATE wydarzenia SET data_do = %s WHERE id = %s", (wydarzenie_edytuj["data_do"], id))
+        cursor.execute("UPDATE wydarzenia SET nazwa = %s WHERE id = %s", (wydarzenie_edytuj["nazwa"], id))
+        cursor.execute("UPDATE wydarzenia SET tytul = %s WHERE id = %s", (wydarzenie_edytuj["tytul"], id))
+        cursor.execute("UPDATE wydarzenia SET opis = %s WHERE id = %s", (wydarzenie_edytuj["opis"], id))
+        cursor.execute("UPDATE wydarzenia SET id_org = %s WHERE id = %s", (wydarzenie_edytuj["id_org"], id))
+        cursor.execute("UPDATE wydarzenia SET id_rodz = %s WHERE id = %s", (wydarzenie_edytuj["id_rodz"], id))
+        cursor.execute("UPDATE wydarzenia SET id_adr = %s WHERE id = %s", (wydarzenie_edytuj["id_adr"], id))
+        conn.commit()
         cursor.close()
         conn.close()
-        return { "status":"ok","updated_id": wydarzenie_edytuj["id_rekordu"] } 
+        return { "status":"ok","updated_id": id } 
+    
+    def soft_delete_wydarzenie(self, id):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("UPDATE wydarzenia SET deleted = 1 WHERE id = %s", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return { "status":"ok","deleted_id": id } 

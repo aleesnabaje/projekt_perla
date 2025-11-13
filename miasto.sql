@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql:3306
--- Generation Time: Lis 07, 2025 at 08:53 AM
+-- Generation Time: Lis 13, 2025 at 11:10 AM
 -- Wersja serwera: 9.5.0
 -- Wersja PHP: 8.3.26
 
@@ -38,7 +38,8 @@ CREATE TABLE `adresy` (
 --
 
 INSERT INTO `adresy` (`id`, `adres`, `wspolrzedne`) VALUES
-(1, 'Targówka spacerowa 16C', '52.167702454689184, 21.592018607125254');
+(1, 'Targówka spacerowa 16C', '52.167702454689184, 21.592018607125254'),
+(2, 'Królewiec Wspólna 112', '52.20550653142254, 21.542565649361276');
 
 -- --------------------------------------------------------
 
@@ -56,7 +57,8 @@ CREATE TABLE `organizatorzy` (
 --
 
 INSERT INTO `organizatorzy` (`id`, `nazwa`) VALUES
-(1, 'Agnieszka Nowicka');
+(1, 'Agnieszka Nowicka'),
+(2, 'Maria Bolanowska');
 
 -- --------------------------------------------------------
 
@@ -74,7 +76,8 @@ CREATE TABLE `rodzaje` (
 --
 
 INSERT INTO `rodzaje` (`id`, `nazwa`) VALUES
-(1, 'Zawody w piciu mleczka');
+(1, 'Zawody w piciu mleczka'),
+(2, 'Turniej');
 
 -- --------------------------------------------------------
 
@@ -91,15 +94,17 @@ CREATE TABLE `wydarzenia` (
   `opis` text NOT NULL,
   `id_org` int NOT NULL,
   `id_rodz` int NOT NULL,
-  `id_adr` int NOT NULL
+  `id_adr` int NOT NULL,
+  `deleted` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Zrzut danych tabeli `wydarzenia`
 --
 
-INSERT INTO `wydarzenia` (`id`, `data_od`, `data_do`, `nazwa`, `tytul`, `opis`, `id_org`, `id_rodz`, `id_adr`) VALUES
-(2, '2025-03-03', '2026-09-10', 'siema', 'elo', 'zawody w piciu mleczka ewki poziom miedzynarodowy', 1, 1, 1);
+INSERT INTO `wydarzenia` (`id`, `data_od`, `data_do`, `nazwa`, `tytul`, `opis`, `id_org`, `id_rodz`, `id_adr`, `deleted`) VALUES
+(2, '2025-06-06', '2026-01-15', 'mleczko', 'brak tytulu', 'strzelanie mleczkiem w mariusza', 1, 1, 1, 1),
+(3, '2025-11-14', '2025-11-17', 'Turniej w biciu Agnieszki N', 'bijemy agnieche', 'kto najbardziej zbije agnieszke dostaje strój elfa od roksany', 1, 2, 2, 0);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -140,25 +145,25 @@ ALTER TABLE `wydarzenia`
 -- AUTO_INCREMENT dla tabeli `adresy`
 --
 ALTER TABLE `adresy`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT dla tabeli `organizatorzy`
 --
 ALTER TABLE `organizatorzy`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT dla tabeli `rodzaje`
 --
 ALTER TABLE `rodzaje`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT dla tabeli `wydarzenia`
 --
 ALTER TABLE `wydarzenia`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Ograniczenia dla zrzutów tabel
