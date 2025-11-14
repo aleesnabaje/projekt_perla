@@ -2,82 +2,331 @@ openapi: 3.0.3
 info:
   title: User API
   version: 1.0.0
+  description: |
+    PL: Prosty interfejs API do zarządzania użytkownikami i pobierania wydarzeń.
+    Zawiera przykładowe ścieżki: dodawanie użytkownika, pobieranie listy użytkowników i
+    pobieranie listy wydarzeń.
+  contact:
+    name: API Support
+    email: support@example.local
 servers:
   - url: http://localhost:9000
+    description: Local development server
+tags:
+  - name: events
+    description: Operacje związane z wydarzeniami (Events operations)
 paths:
-
-  # /add-user:
-  #   post:
-  #     summary: Add a new user
-  #     description: Inserts a new user into the database.
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             type: object
-  #             properties:
-  #               name:
-  #                 type: string
-  #                 example: "Jan Kowalski"
-  #               email:
-  #                 type: string
-  #                 format: email
-  #                 example: "jan@example.com"
-  #             required:
-  #               - name
-  #               - email
-  #     responses:
-  #       "200":
-  #         description: Użytkownik został pomyślnie dodany
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               properties:
-  #                 status:
-  #                   type: string
-  #                   example: "OK"
-  #                 added_id:
-  #                   description: Id dodanego użytkownika
-  #                   type: integer
-  #                   example: 12
-  #       "400":
-  #         description: Invalid input
-  #       "500":
-  #         description: Internal server error         
-    # /get-users:
-  #   get:
-  #     summary: Pobiera listę użytkowników
-  #     responses:
-  #       '200':
-  #         description: Lista użytkowników w formacie json
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 type: object
-  #                 properties:
-  #                   email:
-  #                     type: string
-  #                     format: email
-  #                   name:
-  #                     type: string
-  #                 required:
-  #                   - email
-  #                   - name           
-    /get_wydarzenie:
-      get:
-        summary: Pobiera listę wydarzeń
-        responses:
-          '200':
-            description: : Lista wydarzeń w formacie json
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                    
+  /get-wydarzenie:
+    get:
+      tags:
+        - events
+      summary: Pobiera listę wydarzeń
+      description: Zwraca listę wydarzeń (wszystkie kolumny z tabeli `wydarzenia`).
+      responses:
+        '200':
+          description: Lista wydarzeń w formacie JSON
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wydarzenie'
+              example:
+                - id: 1
+                  data_od: "2025-11-20T09:00:00"
+                  data_do: "2025-11-20T17:00:00"
+                  nazwa: "Python Meeting"
+                  tytul: "Warsztat: FastAPI"
+                  id_org: 2
+                  id_rodz: 1
+                  id_adr: 5
+                  opis: "Opis wydarzenia"
+                  deleted: 0
+        '500':
+          $ref: '#/components/responses/InternalError'
+ 
+  /wydarzenie:
+    post:
+      tags:
+        - events
+      summary: Zapisz nowe wydarzenie
+      description: |
+        Tworzy nowe wydarzenie.
+        Pola wymagane: data_od, data_do, nazwa, tytul.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WydarzenieCreate'
+            example:
+              data_od: "2025-11-20T09:00:00"
+              data_do: "2025-11-20T17:00:00"
+              nazwa: "Python Meeting"
+              tytul: "Warsztat: FastAPI"
+              id_org: 2
+              id_rodz: 1
+              id_adr: 5
+              opis: "Opis wydarzenia"
+      responses:
+        '201':
+          description: Wydarzenie utworzone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModifyResponse'
+              example:
+                status: "ok"
+                added_id: 12
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+ 
+  /wydarzenie/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: ID wydarzenia
+        required: true
+        schema:
+          type: integer
+    put:
+      tags:
+        - events
+      summary: Edytuj wydarzenie
+      description: |
+        Aktualizuje pola wydarzenia o podanym ID.
+        Przekaż pola do zaktualizowania.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WydarzenieUpdate'
+            example:
+              data_od: "2025-11-20T10:00:00"
+              tytul: "Zmieniony tytul"
+      responses:
+        '201':
+          description: Wydarzenie zaktualizowane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModifyResponse'
+              example:
+                status: "ok"
+                updated_id: 12
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - events
+      summary: Oznacz wydarzenie jako usunięte (soft delete)
+      description: |
+        Ustawi pole `deleted` na 1 dla rekordu o podanym ID.
+      responses:
+        '201':
+          description: Wydarzenie oznaczone jako usunięte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModifyResponse'
+              example:
+                status: "ok"
+                deleted_id: 12
+        '500':
+          $ref: '#/components/responses/InternalError'
+ 
+components:
+  schemas:
+    User:
+      type: object
+      description: Reprezentacja użytkownika zwracana przez API
+      properties:
+        name:
+          type: string
+          example: "Jan Kowalski"
+        email:
+          type: string
+          format: email
+          example: "jan@example.com"
+      required:
+        - name
+        - email
+ 
+    UserCreate:
+      type: object
+      description: Dane wymagane do utworzenia nowego użytkownika
+      properties:
+        name:
+          type: string
+          example: "Anna Nowak"
+        email:
+          type: string
+          format: email
+          example: "anna@example.com"
+      required:
+        - name
+        - email
+ 
+    AddUserResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "OK"
+        added_id:
+          description: Id dodanego użytkownika / ID of the created user
+          type: integer
+          example: 12
+ 
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Konferencja Python"
+        date:
+          type: string
+          format: date-time
+          example: "2025-11-20T09:00:00Z"
+        location:
+          type: string
+          example: "Warszawa"
+        description:
+          type: string
+          example: "Spotkanie społeczności Pythona"
+ 
+    Wydarzenie:
+      type: object
+      description: Reprezentacja rekordu z tabeli `wydarzenia`
+      properties:
+        id:
+          type: integer
+          example: 1
+        data_od:
+          type: string
+          format: date-time
+          example: "2025-11-20T09:00:00"
+        data_do:
+          type: string
+          format: date-time
+          example: "2025-11-20T17:00:00"
+        nazwa:
+          type: string
+          example: "Python Meeting"
+        tytul:
+          type: string
+          example: "Warsztat: FastAPI"
+        id_org:
+          type: integer
+          example: 2
+        id_rodz:
+          type: integer
+          example: 1
+        id_adr:
+          type: integer
+          example: 5
+        opis:
+          type: string
+          example: "Opis wydarzenia"
+        deleted:
+          type: integer
+          example: 0
+ 
+    WydarzenieCreate:
+      type: object
+      properties:
+        data_od:
+          type: string
+          format: date-time
+        data_do:
+          type: string
+          format: date-time
+        nazwa:
+          type: string
+        tytul:
+          type: string
+        id_org:
+          type: integer
+        id_rodz:
+          type: integer
+        id_adr:
+          type: integer
+        opis:
+          type: string
+      required:
+        - data_od
+        - data_do
+        - nazwa
+        - tytul
+ 
+    WydarzenieUpdate:
+      type: object
+      description: Pola które mogą być aktualizowane. Wszystkie są opcjonalne.
+      properties:
+        data_od:
+          type: string
+          format: date-time
+        data_do:
+          type: string
+          format: date-time
+        nazwa:
+          type: string
+        tytul:
+          type: string
+        id_org:
+          type: integer
+        id_rodz:
+          type: integer
+        id_adr:
+          type: integer
+        opis:
+          type: string
+ 
+    ModifyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        added_id:
+          type: integer
+          example: 12
+        updated_id:
+          type: integer
+          example: 12
+        deleted_id:
+          type: integer
+          example: 12
+ 
+    Error:
+      type: object
+      description: Obiekt reprezentujący błąd
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+          example: 500
+ 
+  responses:
+    BadRequest:
+      description: Nieprawidłowe dane wejściowe / Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+ 
+    InternalError:
+      description: Błąd serwera / Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
